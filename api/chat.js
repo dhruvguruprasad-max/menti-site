@@ -15,23 +15,21 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Invalid request body" });
     }
 
-    const completion = await client.chat.completions.create({
-      model: "gpt-4o-mini", // fallback model; change to "gpt-3.5-turbo" if you prefer
+    const response = await client.chat.completions.create({
+      model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content:
-            "You are Menti, a friendly AI study buddy for medical students. Help them learn, ask short follow-ups, summarise, and do not provide medical treatment.",
+          content: "You are Menti, a friendly study buddy. Never give medical advice.",
         },
         ...messages,
       ],
-      max_tokens: 600,
+      max_tokens: 300,
     });
 
-    const content = completion.choices?.[0]?.message?.content ?? "";
-    res.status(200).json({ content });
-  } catch (error) {
-    console.error("OpenAI Error:", error);
-    res.status(500).json({ error: "Server error", message: error.message });
+    res.status(200).json({ content: response.choices[0].message.content });
+  } catch (err) {
+    console.error("OpenAI Error:", err);
+    res.status(500).json({ error: err.message });
   }
 }

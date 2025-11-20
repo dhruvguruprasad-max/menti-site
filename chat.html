@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Menti — Chat</title>
+<style>
+  :root {
+    --mint:#0FD3A0; --lav:#B68CFF; --ink:#0f1115; --muted:#6b7280; --card:#ffffff;
+    --bg:linear-gradient(180deg,#f0fffb,#f8f5ff);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--ink)}
+  .container{max-width:1000px;margin:20px auto;padding:18px}
+  .chat-stage{position:relative;border-radius:14px;background:var(--card);box-shadow:0 14px 36px rgba(2,6,23,.06);padding:20px;display:grid;grid-template-columns:220px 1fr;gap:20px}
+  @media (max-width:800px){ .chat-stage{grid-template-columns:1fr} }
+  .avatar-large{width:200px;height:200px;border-radius:50%;background:#e7fffb;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(2,6,23,.06);margin:auto;border:4px solid #d1faf0}
+  .title{font-size:22px;font-weight:800;margin:0}
+  .subtitle{color:var(--muted);font-size:14px;margin:6px 0 12px}
+  .messages{background:rgba(255,255,255,0.9);border-radius:12px;padding:12px;max-height:400px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+  .msg{padding:10px 12px;border-radius:12px;display:inline-block;max-width:78%;box-shadow:0 8px 20px rgba(2,6,23,.03)}
+  .msg.bot{background:#fff;align-self:flex-start}
+  .msg.you{background:linear-gradient(180deg,#e6fff6,#d6fff0);align-self:flex-end;font-weight:700}
+  .composer{display:flex;gap:10px;align-items:flex-end;margin-top:12px}
+  textarea{flex:1;min-height:76px;border-radius:12px;border:1px solid #e6e8ef;padding:10px 12px;resize:vertical;font-family:inherit}
+  .btn{border:0;cursor:pointer;border-radius:10px;font-weight:800}
+  .send{background:linear-gradient(130deg,var(--mint),var(--lav));color:#fff;padding:10px 14px}
+  .mic,.upload{background:#fff;border:1px solid #ddd;padding:10px 12px}
+  .small{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="title">Teach Menti 🩺</div>
+  <p class="subtitle">Explain a topic like you're teaching a junior student. Menti will ask follow-ups and encourage you.</p>
+
+  <div class="chat-stage">
+    <div style="text-align:center">
+      <div class="avatar-large" aria-hidden="true">
+        <!-- Clean doctor avatar (no stethoscope) -->
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="130" height="130">
+          <circle cx="60" cy="60" r="54" fill="#d9fff4" stroke="#b8f3e4" stroke-width="2"/>
+          <circle cx="60" cy="55" r="22" fill="#ffe5c5"/>
+          <path d="M38 48 Q60 22 82 48 Q82 34 72 28 Q60 22 48 28 Q38 34 38 48Z" fill="#3c2f2f"/>
+          <circle cx="52" cy="56" r="3" fill="#1c1c1c"/>
+          <circle cx="68" cy="56" r="3" fill="#1c1c1c"/>
+          <path d="M52 64 Q60 70 68 64" stroke="#7a4b2b" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <rect x="40" y="77" width="40" height="22" rx="6" fill="#e7f7f4"/>
+        </svg>
+      </div>
+      <div style="margin-top:8px;font-weight:700;font-size:16px;">Menti</div>
+      <div class="small">Your friendly study buddy</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;">
+      <div class="messages" id="messages" role="log" aria-live="polite">
+        <div class="msg bot">👋 Hi! What topic will you teach me today?</div>
+      </div>
+
+      <div class="composer">
+        <textarea id="textInput" placeholder="Type your explanation here..."></textarea>
+
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+          <label class="upload" title="Upload image">
+            <input id="imageInput" type="file" accept="image/*" style="display:none" />
+            📷
+          </label>
+          <button class="mic" id="micBtn" title="Record audio">🎤</button>
+          <button class="send" id="sendBtn">Send</button>
+        </div>
+      </div>
+
+      <div class="small" style="margin-top:8px;">You can send text, image, or voice input.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const messagesEl = document.getElementById('messages');
+const textInput = document.getElementById('textInput');
+const sendBtn = document.getElementById('sendBtn');
+const micBtn = document.getElementById('micBtn');
+const imageInput = document.getElementById('imageInput');
+
+let mediaRecorder = null;
+let audioChunks = [];
+
+function appendMessage(role, text, imageData) {
+  const msg = document.createElement('div');
+  msg.className = 'msg ' + (role === 'user' ? 'you' : 'bot');
+  if(imageData){
+    const img = document.createElement('img');
+    img.src = imageData;
+    img.style.maxWidth = '280px';
+    img.style.borderRadius = '10px';
+    msg.appendChild(img);
+    if(text){ const t = document.createElement('div'); t.textContent = text; t.style.marginTop = '6px'; msg.appendChild(t); }
+  } else msg.textContent = text;
+  messagesEl.appendChild(msg);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+async function sendToServer(userText) {
+  const thinking = document.createElement('div');
+  thinking.className = 'msg bot';
+  thinking.textContent = 'Thinking...';
+  messagesEl.appendChild(thinking);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ messages:[{role:'user', content:userText}] })
+    });
+    if(!res.ok){
+      const err = await res.text();
+      thinking.remove();
+      appendMessage('bot', 'Server error: ' + (err || res.status));
+      return;
+    }
+    const data = await res.json();
+    thinking.remove();
+    appendMessage('bot', data.content || "Sorry, I couldn't respond.");
+  } catch (err) {
+    thinking.remove();
+    appendMessage('bot', 'Network error. (See console)');
+    console.error('Network error sending to /api/chat:', err);
+  }
+}
+
+sendBtn.addEventListener('click', () => {
+  const text = textInput.value.trim();
+  if(!text) return;
+  appendMessage('user', text);
+  sendToServer(text);
+  textInput.value = '';
+});
+
+textInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.click(); }
+});
+
+imageInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = reader.result;
+    appendMessage('user', '📸 Sent an image', dataUrl);
+    sendToServer(`[Image uploaded: ${file.name}]`);
+  };
+  reader.readAsDataURL(file);
+  imageInput.value = '';
+});
+
+micBtn.addEventListener('click', async () => {
+  if(mediaRecorder && mediaRecorder.state === 'recording'){
+    mediaRecorder.stop();
+    micBtn.textContent = '🎤';
+    return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunks, { type:'audio/webm' });
+      const reader = new FileReader();
+      reader.onload = () => {
+        appendMessage('user', '🎙️ Sent a voice message');
+        sendToServer('[Audio message]');
+      };
+      reader.readAsDataURL(blob);
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    mediaRecorder.start();
+    micBtn.textContent = '⏹';
+  } catch(err) {
+    alert('Microphone access denied or not available.');
+  }
+});
+</script>
+</body>
+</html>

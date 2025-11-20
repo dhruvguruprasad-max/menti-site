@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Menti — Study Smarter</title>
+<style>
+  :root {
+    --mint:#0FD3A0;
+    --lav:#B68CFF;
+    --ink:#0f1115;
+    --muted:#6b7280;
+    --bg1:#f0fffb;
+    --bg2:#f8f5ff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--ink)}
+
+  header{padding:20px;text-align:center;font-weight:800;font-size:26px;}
+  header span{background:linear-gradient(130deg,var(--mint),var(--lav));-webkit-background-clip:text;color:transparent;}
+
+  .hero{
+    max-width:1000px;
+    margin:20px auto;
+    padding:20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+  }
+
+  .hero-text{max-width:480px;}
+  .hero-text h1{font-size:40px;margin-bottom:10px;}
+  .hero-text p{font-size:16px;color:var(--muted);}
+
+  .buttons{margin-top:22px;display:flex;gap:14px;flex-wrap:wrap}
+  .btn{
+    padding:12px 18px;
+    border-radius:12px;
+    font-weight:800;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
+  }
+  .primary{background:linear-gradient(130deg,var(--mint),var(--lav));color:#fff;}
+  .outline{border:2px solid var(--lav);color:var(--lav);background:#fff;}
+
+  .avatar-box{
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:#e7fffb;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
+    box-shadow:0 10px 30px rgba(2,6,23,.06);
+  }
+
+  .surprise{
+    margin:40px auto;
+    text-align:center;
+    width:180px;
+    padding:14px 0;
+    background:#fff5d1;
+    border-radius:30px;
+    cursor:pointer;
+    font-weight:700;
+    box-shadow:0 6px 20px rgba(0,0,0,.1);
+    transition:transform .2s;
+  }
+  .surprise:hover{transform:scale(1.06);}
+</style>
+</head>
+<body>
+
+<header>
+  Welcome to <span>Menti</span>
+</header>
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Your AI Study Buddy</h1>
+    <p>Teach Menti any topic — it listens, asks smart questions, tests your understanding and helps you remember better. Built for medical students, designed for everyone.</p>
+
+    <div class="buttons">
+      <a href="chat.html" class="btn primary">Start Learning</a>
+      <a href="plans.html" class="btn outline">Go Pro</a>
+    </div>
+  </div>
+
+  <div class="avatar-box">
+    <!-- Clean doctor avatar -->
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="180" height="180">
+      <circle cx="60" cy="60" r="54" fill="#d9fff4" stroke="#b8f3e4" stroke-width="2"/>
+      <circle cx="60" cy="55" r="22" fill="#ffe5c5"/>
+      <path d="M38 48 Q60 22 82 48 Q82 34 72 28 Q60 22 48 28 Q38 34 38 48Z" fill="#3c2f2f"/>
+      <circle cx="52" cy="56" r="3" fill="#1c1c1c"/>
+      <circle cx="68" cy="56" r="3" fill="#1c1c1c"/>
+      <path d="M52 64 Q60 70 68 64" stroke="#7a4b2b" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <rect x="40" y="77" width="40" height="22" rx="6" fill="#e7f7f4"/>
+    </svg>
+  </div>
+</section>
+
+<div class="surprise" id="surpriseBtn">🎁 Surprise!</div>
+
+<script>
+document.getElementById("surpriseBtn").onclick = () => {
+  alert("🎉 Use code MENTI10 for 10% OFF on Pro!");
+};
+</script>
+
+</body>
+</html>
